@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>扫码核销 - 鹿途拼拼</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .nav-btn {
+            padding: 8px 15px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .stats-btn {
+            background-color: #2196F3;
+        }
+        .records-btn {
+            background-color: #FF9800;
+        }
+        .logout-btn {
+            background-color: #f44336;
+        }
+        .merchant-info {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .scan-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        #video {
+            width: 100%;
+            border-radius: 8px;
+        }
+        #canvas {
+            display: none;
+        }
+        .scan-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid #2196F3;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #2196F3;
+            animation: scan 2s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        .camera-controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .camera-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 80%;
+            width: 400px;
+        }
+        .result-success {
+            color: #4CAF50;
+        }
+        .result-error {
+            color: #f44336;
+        }
+        .scan-status {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .scan-tips {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #1976d2;
+        }
+        .scan-success {
+            animation: flash 0.5s;
+        }
+        @keyframes flash {
+            0% { background: rgba(76, 175, 80, 0.5); }
+            100% { background: transparent; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>扫码核销</h1>
+            <div class="nav-buttons">
+                <a href="/merchant/stats" class="nav-btn stats-btn">查看统计</a>
+                <a href="/merchant/records" class="nav-btn records-btn">查看记录</a>
+                <a href="/merchant/logout" class="nav-btn logout-btn">退出登录</a>
+            </div>
+        </div>
+
+        <div class="merchant-info">
+            <p>当前商家：<%= merchantName %></p>
+        </div>
+
+        <div class="scan-container">
+            <video id="video" playsinline></video>
+            <canvas id="canvas"></canvas>
+            <div class="scan-overlay">
+                <div class="scan-line"></div>
+            </div>
+        </div>
+
+        <div class="scan-status" id="scanStatus">准备就绪，等待扫码...</div>
+        <div class="scan-tips">
+            提示：
+            <ul>
+                <li>请将二维码对准扫描框</li>
+                <li>确保光线充足</li>
+                <li>保持手机稳定</li>
+            </ul>
+        </div>
+
+        <div class="camera-controls">
+            <button id="startButton" class="camera-btn">开启摄像头</button>
+        </div>
+    </div>
+
+    <div class="result-modal" id="resultModal">
+        <div class="modal-content">
+            <h2 id="resultTitle"></h2>
+            <p id="resultMessage"></p>
+            <div class="button-group">
+                <button onclick="closeModal()" class="camera-btn">继续扫码</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let video = document.getElementById('video');
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+        let scanning = false;
+        let stream = null;
+
+        document.getElementById('startButton').addEventListener('click', startCamera);
+
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" }
+                });
+                video.srcObject = stream;
+                video.setAttribute('playsinline', true);
+                video.play();
+                requestAnimationFrame(tick);
+                scanning = true;
+                
+                const button = document.getElementById('startButton');
+                button.textContent = '关闭摄像头';
+                button.onclick = stopCamera;
+                
+                document.getElementById('scanStatus').textContent = '准备就绪，等待扫码...';
+            } catch (err) {
+                console.error('Error:', err);
+                alert('无法访问摄像头，请确保已授予摄像头权限。');
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => {
+                    track.stop();
+                });
+                video.srcObject = null;
+                scanning = false;
+                stream = null;
+                
+                const button = document.getElementById('startButton');
+                button.textContent = '开启摄像头';
+                button.onclick = startCamera;
+                
+                document.getElementById('scanStatus').textContent = '摄像头已关闭';
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function tick() {
+            if (video.readyState === video.HAVE_ENOUGH_DATA && scanning) {
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                var code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+                
+                if (code) {
+                    handleQRCode(code.data);
+                    scanning = false;
+                }
+            }
+            if (scanning) {
+                requestAnimationFrame(tick);
+            }
+        }
+
+        function handleQRCode(qrData) {
+            fetch('/api/verify-qr', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ qrData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showResult(data.success, data.message, data.activity);
+            })
+            .catch(error => {
+                showResult(false, '网络错误，请重试');
+            });
+        }
+
+        function showResult(success, message, activity) {
+            const modal = document.getElementById('resultModal');
+            const title = document.getElementById('resultTitle');
+            const messageEl = document.getElementById('resultMessage');
+
+            title.className = success ? 'result-success' : 'result-error';
+            title.textContent = success ? '核销成功' : '核销失败';
+            
+            let messageText = message;
+            if (success && activity) {
+                messageText = `
+                    ${message}
+                    
+                    活动详情：
+                    - 名称：${activity.name}
+                    - 类型：${activity.type || '未指定'}
+                    - 规则：${activity.rules}
+                `;
+            }
+            messageEl.innerHTML = messageText.replace(/\n/g, '<br>');
+            
+            if ('vibrate' in navigator) {
+                navigator.vibrate(success ? [100] : [100, 100, 100]);
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('resultModal').style.display = 'none';
+            if (confirm('是否继续扫码？')) {
+                scanning = true;
+                requestAnimationFrame(tick);
+            } else {
+                stopCamera();
+            }
+        }
+    </script>
+</body>
+</html>

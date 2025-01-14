@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>核销记录 - 鹿途拼拼</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .records-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .nav-btn {
+            padding: 8px 15px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-btn {
+            background-color: #666;
+        }
+        .stats-btn {
+            background-color: #2196F3;
+        }
+        .logout-btn {
+            background-color: #f44336;
+        }
+        .merchant-info {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .records-list {
+            margin-top: 20px;
+        }
+        .record-item {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background: white;
+        }
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .record-time {
+            color: #666;
+            font-size: 14px;
+        }
+        .record-details {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        .activity-type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 8px;
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="records-container">
+        <div class="header">
+            <h1>核销记录</h1>
+            <div class="nav-buttons">
+                <a href="/merchant/verify" class="nav-btn back-btn">返回扫码</a>
+                <a href="/merchant/stats" class="nav-btn stats-btn">查看统计</a>
+                <a href="/merchant/logout" class="nav-btn logout-btn">退出登录</a>
+            </div>
+        </div>
+
+        <div class="merchant-info">
+            <p>当前商家：<%= merchantName %></p>
+        </div>
+
+        <div class="records-list">
+            <% if (records && records.length > 0) { %>
+                <% records.forEach(record => { %>
+                    <div class="record-item">
+                        <div class="record-header">
+                            <h3>
+                                <%= record.activityName %>
+                                <span class="activity-type"><%= record.activityTypeName %></span>
+                            </h3>
+                            <span class="record-time">
+                                <%= moment(record.verifiedAt).format('YYYY-MM-DD HH:mm:ss') %>
+                            </span>
+                        </div>
+                        <div class="record-details">
+                            <p>核销编号：<%= record.codeId %></p>
+                            <p>活动ID：<%= record.activityId %></p>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="empty-state">
+                    <h2>暂无核销记录</h2>
+                    <p>开始扫码核销后，记录将显示在这里</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>
