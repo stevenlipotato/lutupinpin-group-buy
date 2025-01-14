@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const QRCode = require('qrcode');
 const crypto = require('crypto');
 const path = require('path');
+const mongoose = require('mongoose');
+const MongoStore = require('connect-mongo');
 
 const app = express();
 
@@ -16,10 +18,56 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(session({
-    secret: 'lutupinpin-secret',
+    secret: process.env.SESSION_SECRET || 'lutupinpin-secret',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI,
+        ttl: 24 * 60 * 60 // 1 day
+    })
 }));
+
+// 数据库模型
+const Activity = mongoose.model('Activity', {
+    id: String,
+    name: String,
+    rules: String,
+    quota: Number,
+    type: String,
+    createdAt: Date,
+    startDate: Date,
+    endDate: Date,
+    usedQuota: Number,
+    status: String
+});
+
+const Merchant = mongoose.model('Merchant', {
+    id: String,
+    password: String,
+    name: String
+});
+
+const VerificationRecord = mongoose.model('VerificationRecord', {
+    id: String,
+    codeId: String,
+    activityId: String,
+    merchantId: String,
+    merchantName: String,
+    verifiedAt: Date,
+    activityName: String,
+    activityType: String,
+    activityTypeName: String
+});
+
+// MongoDB 连接
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('MongoDB connected');
+}).catch(err => {
+    console.error('MongoDB connection error:', err);
+});
 
 // 存储数据（实际项目中应该使用数据库）
 const activities = [];
