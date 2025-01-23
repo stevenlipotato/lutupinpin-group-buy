@@ -8,6 +8,10 @@
   ],
   "routes": [
     {
+      "src": "/shared/(.*)",
+      "dest": "/src/views/shared/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "src/server.js"
     }

@@ -1309,7 +1309,10 @@ mongoose.set('debug', process.env.NODE_ENV === 'development');
 // 连接数据库
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000, // 超时时间
+    socketTimeoutMS: 45000, // Socket 超时
+    retryWrites: true
 }).then(() => {
     console.log('MongoDB connected successfully');
     
@@ -1321,34 +1324,10 @@ mongoose.connect(process.env.MONGODB_URI, {
     const server = app.listen(PORT, '0.0.0.0', () => {
         console.log(`HTTP Server running on http://0.0.0.0:${PORT}`);
     });
-
-    // 优雅关闭
-    process.on('SIGTERM', gracefulShutdown);
-    process.on('SIGINT', gracefulShutdown);
-
-    async function gracefulShutdown(signal) {
-        console.log(`Received ${signal}. Starting graceful shutdown...`);
-        
-        // 停止接收新的请求
-        server.close(async () => {
-            console.log('HTTP server closed');
-            
-            try {
-                // 关闭数据库连接
-                await mongoose.connection.close();
-                console.log('MongoDB connection closed');
-                
-                // 退出进程
-                process.exit(0);
-            } catch (error) {
-                console.error('Error during shutdown:', error);
-                process.exit(1);
-            }
-        });
-    }
 }).catch(err => {
     console.error('MongoDB connection error:', err);
-    process.exit(1);
+    // 不要立即退出进程
+    console.error('Failed to connect to MongoDB, retrying...');
 });
 
 // 添加更多连接事件监听
@@ -1361,11 +1340,11 @@ mongoose.connection.on('connected', () => {
 });
 
 mongoose.connection.on('disconnected', () => {
-    console.log('MongoDB disconnected!');
+    console.log('MongoDB disconnected, attempting to reconnect...');
 });
 
-mongoose.connection.on('error', (err) => {
-    console.error('MongoDB connection error:', err);
+mongoose.connection.on('error', err => {
+    console.error('MongoDB error:', err);
 });
 
 // 确保有环境变量
