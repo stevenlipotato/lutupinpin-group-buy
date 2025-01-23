@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>鹿途拼拼 - 商家管理</title>
+    <link rel="stylesheet" href="/shared/colors.css">
+    <link rel="stylesheet" href="/shared/base.css">
+    <link rel="stylesheet" href="/shared/admin-base.css">
+    <script src="/shared/utils.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .header h1 {
+            margin: 0;
+            color: #333;
+        }
+        .merchant-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .merchant-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .merchant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .merchant-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        .merchant-username {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .merchant-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .merchant-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-active {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-suspended {
+            background-color: #dc3545;
+            color: white;
+        }
+        @media (max-width: 768px) {
+            .merchant-grid {
+                grid-template-columns: 1fr;
+            }
+            .merchant-card {
+                padding: 15px;
+            }
+            .merchant-stats {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .merchant-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .action-buttons {
+                width: 100%;
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+        .current-activities {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .current-activities h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .activity-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .activity-tag {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .activity-name {
+            font-weight: 500;
+        }
+        
+        .activity-type {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .activity-progress {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .no-activities {
+            color: #999;
+            font-size: 13px;
+            text-align: center;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <%- include('shared/admin-header') %>
+
+    <main class="admin-container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <span class="admin-card-title">商家管理</span>
+                <a href="/admin/merchants/create" class="admin-button">创建商家</a>
+            </div>
+            
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>商家名称</th>
+                        <th>用户名</th>
+                        <th>创建时间</th>
+                        <th>参与活动</th>
+                        <th>核销统计</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% merchants.forEach(merchant => { %>
+                        <tr>
+                            <td><%= merchant.merchantName %></td>
+                            <td><%= merchant.username %></td>
+                            <td><%= moment(merchant.createdAt).format('YYYY-MM-DD') %></td>
+                            <td>
+                                <% if (merchant.currentActivities && merchant.currentActivities.length > 0) { %>
+                                    <%= merchant.currentActivities.map(a => a.name).join(', ') %>
+                                <% } else { %>
+                                    暂无参与活动
+                                <% } %>
+                            </td>
+                            <td>
+                                今日: <%= merchant.stats.today %> | 总计: <%= merchant.stats.total %>
+                            </td>
+                            <td>
+                                <button onclick="showChangePasswordModal('<%= merchant.id %>', '<%= merchant.merchantName %>')" class="admin-button">修改密码</button>
+                                <button onclick="toggleStatus('<%= merchant.id %>', '<%= merchant.status %>')" 
+                                        class="admin-button <%= merchant.status === 'active' ? 'warning' : 'success' %>">
+                                    <%= merchant.status === 'active' ? '禁用' : '启用' %>
+                                </button>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="changePasswordModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>修改商家密码</h3>
+                <span class="close" onclick="closeChangePasswordModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm" class="admin-form">
+                    <input type="hidden" id="merchantId" name="merchantId">
+                    <div class="form-group">
+                        <label>商家名称</label>
+                        <input type="text" id="merchantName" readonly class="admin-input">
+                    </div>
+                    <div class="form-group">
+                        <label>新密码</label>
+                        <input type="password" id="newPassword" name="newPassword" required class="admin-input" 
+                               placeholder="请输入新密码" minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label>确认新密码</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required class="admin-input" 
+                               placeholder="请再次输入新密码" minlength="6">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="admin-button">确认修改</button>
+                        <button type="button" onclick="closeChangePasswordModal()" class="admin-button secondary">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function resetPassword(merchantId) {
+            if (!await showConfirm('重置密码', '确定要重置该商家的密码吗？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/admin/merchants/${merchantId}/reset-password`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showToast('密码已重置', 'success');
+                } else {
+                    showToast(result.message || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('操作失败，请重试', 'error');
+            }
+        }
+
+        async function toggleStatus(merchantId, currentStatus) {
+            const action = currentStatus === 'active' ? '禁用' : '启用';
+            if (!await showConfirm(`${action}商家`, `确定要${action}该商家吗？`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/admin/merchants/${merchantId}/toggle-status`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showToast(`商家已${action}`, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(result.message || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('操作失败，请重试', 'error');
+            }
+        }
+
+        function showChangePasswordModal(merchantId, merchantName) {
+            const modal = document.getElementById('changePasswordModal');
+            document.getElementById('merchantId').value = merchantId;
+            document.getElementById('merchantName').value = merchantName;
+            modal.style.display = 'block';
+        }
+
+        function closeChangePasswordModal() {
+            const modal = document.getElementById('changePasswordModal');
+            modal.style.display = 'none';
+            document.getElementById('changePasswordForm').reset();
+        }
+
+        // 添加点击模态框外部关闭功能
+        window.onclick = function(event) {
+            const modal = document.getElementById('changePasswordModal');
+            if (event.target === modal) {
+                closeChangePasswordModal();
+            }
+        }
+
+        document.getElementById('changePasswordForm').onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showToast('两次输入的密码不一致', 'error');
+                return;
+            }
+            
+            const merchantId = document.getElementById('merchantId').value;
+            
+            try {
+                const response = await fetch(`/admin/merchants/${merchantId}/change-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ newPassword })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showToast('密码修改成功', 'success');
+                    closeChangePasswordModal();
+                } else {
+                    showToast(result.message || '修改失败', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('修改失败，请重试', 'error');
+            }
+        };
+    </script>
+</body>
+</html> 

@@ -1,0 +1,39 @@
+[
+  {
+    "id": "d87a3a52bad0f7cd504d763f163ae6d9",
+    "username": "lutupinpin",
+    "password": "$2a$10$.qzvIaHAWesCjHmrByuBj.FkAjODSXxsQ7Rfe6esdF1b01YIwzwpa",
+    "role": "admin",
+    "createdAt": "2025-01-18T02:31:50.435Z"
+  },
+  {
+    "id": "4b10316365e93e0053264931880e980e",
+    "username": "merchant001",
+    "password": "$2a$10$8jWDhwYWJ9qev60MUeBE.e8wPU43WtO1QRZULTopyZEW4ksGDyFN2",
+    "merchantName": "G.S Tea",
+    "role": "merchant",
+    "createdAt": "2025-01-18T02:32:15.652Z",
+    "createdBy": "d87a3a52bad0f7cd504d763f163ae6d9",
+    "status": "active"
+  },
+  {
+    "id": "aa1709812892c71b8b5185bfd07f6eb6",
+    "username": "ohho",
+    "password": "$2a$10$UJxnhCtv9OW5FQynFW5M6.bXfbAvT.USTgSMEoy..zsl2EH1kEVDy",
+    "merchantName": "ohho cafe",
+    "role": "merchant",
+    "createdAt": "2025-01-18T02:37:45.670Z",
+    "createdBy": "d87a3a52bad0f7cd504d763f163ae6d9",
+    "status": "active"
+  },
+  {
+    "id": "fed3ba0295d90c9d60370d30969e7b23",
+    "username": "gakki",
+    "password": "$2a$10$nlAR6ArrJfpX7C.42vXt8uP8RXSvZ5X/WuFUOKqg13TMASDu84weS",
+    "merchantName": "Gakki",
+    "role": "merchant",
+    "createdAt": "2025-01-20T21:57:02.607Z",
+    "createdBy": "73141bb6579221045c0f68322ce6a42e",
+    "status": "active"
+  }
+]

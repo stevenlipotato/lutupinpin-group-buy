@@ -1,133 +1,246 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>活动二维码 - 鹿途拼拼管理后台</title>
+    <title>鹿途拼拼 - 活动二维码</title>
+    <link rel="stylesheet" href="/shared/colors.css">
+    <link rel="stylesheet" href="/shared/base.css">
+    <link rel="stylesheet" href="/shared/admin-base.css">
+    <script src="/shared/utils.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
+        .qr-codes-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
             padding: 20px;
-            background-color: #f5f5f5;
         }
-        .qr-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+
+        .qr-code-card {
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .back-btn {
-            padding: 5px 10px;
-            background-color: #666;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .activity-info {
-            text-align: left;
-            margin: 20px 0;
             padding: 15px;
-            background: #f9f9f9;
-            border-radius: 4px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            text-align: center;
         }
+
+        .qr-code-image {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            margin: 10px 0;
+        }
+
+        .qr-code-info {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .used {
+            opacity: 0.5;
+            position: relative;
+        }
+
+        .used::after {
+            content: '已使用';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            background: var(--error-color);
+            color: white;
+            padding: 5px 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .activity-info {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+
+        .activity-info h2 {
+            margin: 0 0 15px 0;
+            color: var(--primary-color);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            padding: 10px;
+            background: var(--background-light);
+            border-radius: 8px;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
         .qr-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 20px;
-            margin: 20px 0;
+            margin-top: 30px;
         }
-        .qr-item {
-            text-align: center;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+
+        .qr-card {
             background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            text-align: center;
+            position: relative;
         }
-        .qr-item img {
-            max-width: 150px;
+
+        .qr-image {
+            width: 100%;
+            height: auto;
             margin-bottom: 10px;
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
-        .download-btn {
-            padding: 8px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
+
+        .qr-status {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            border-radius: 12px;
+            z-index: 1;
+        }
+
+        .status-used {
+            background: rgba(var(--error-rgb), 0.15);
+            color: var(--error-color);
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+            letter-spacing: 4px;
+            transform: rotate(-15deg);
+        }
+
+        .status-unused {
+            display: none;
+        }
+
+        .qr-card.used .qr-image {
+            opacity: 0.2;
+            filter: grayscale(100%);
+        }
+
+        .qr-info {
             font-size: 14px;
+            color: var(--text-light);
+            position: relative;
+            z-index: 2;
         }
-        .download-btn:hover {
-            background-color: #45a049;
+
+        .used-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--background-light);
+            border-radius: 8px;
+            font-size: 12px;
+            position: relative;
+            z-index: 2;
         }
-        .download-all-btn {
+
+        .download-all {
             margin: 20px 0;
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #2196F3;
+            text-align: right;
         }
-        .download-all-btn:hover {
-            background-color: #1976D2;
-        }
-        .qr-code-number {
-            margin: 10px 0;
-            color: #666;
-            font-size: 14px;
+
+        @media screen and (max-width: 768px) {
+            .qr-codes-container {
+                padding: 10px;
+            }
+
+            .qr-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .qr-card {
+                padding: 10px;
+            }
+
+            .qr-status {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="qr-container">
-        <div class="header">
-            <h1>活动二维码</h1>
-            <a href="/admin/dashboard" class="back-btn">返回仪表板</a>
-        </div>
-        
+    <%- include('shared/admin-header') %>
+
+    <main class="admin-container">
         <div class="activity-info">
-            <h3>活动信息</h3>
-            <p><strong>活动名称：</strong><%= activity.name %></p>
-            <p><strong>活动规则：</strong><%= activity.rules %></p>
-            <p><strong>总名额：</strong><%= activity.quota %></p>
+            <h2><%= activity.name %></h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">活动状态</div>
+                    <div class="info-value"><%= activity.status %></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">已使用/总数</div>
+                    <div class="info-value"><%= activity.usedQuota %>/<%= activity.quota %></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">剩余数量</div>
+                    <div class="info-value"><%= activity.quota - activity.usedQuota %></div>
+                </div>
+            </div>
         </div>
 
-        <button onclick="downloadAllQRCodes()" class="download-btn 
-download-all-btn">
-            下载所有二维码
-        </button>
-        
-        <div class="qr-grid">
-            <% qrCodes.forEach(qr => { %>
-                <div class="qr-item">
-                    <img src="<%= qr.url %>" alt="二维码 #<%= qr.id %>">
-                    <div class="qr-code-number">编号: #<%= qr.id %></div>
-                    <a href="<%= qr.url %>" download="activity-qr-<%= qr.id 
-%>.png" class="download-btn">
-                        下载此二维码
-                    </a>
+        <div class="qr-codes-container">
+            <% codes.forEach((code, index) => { %>
+                <div class="qr-code-card <%= code.used ? 'used' : '' %>">
+                    <div class="qr-code-number">二维码 #<%= index + 1 %></div>
+                    <img src="<%= code.qrCode %>" alt="QR Code" class="qr-code-image">
+                    <div class="qr-code-info">
+                        <% if (code.used) { %>
+                            <div>使用时间：<%= moment(code.usedAt).format('YYYY-MM-DD HH:mm:ss') %></div>
+                        <% } %>
+                    </div>
                 </div>
-            <% }) %>
+            <% }); %>
         </div>
-    </div>
+    </main>
 
     <script>
-    function downloadAllQRCodes() {
-        const qrCodes = document.querySelectorAll('.qr-item a');
-        qrCodes.forEach((link, index) => {
-            setTimeout(() => {
-                link.click();
-            }, index * 100); // 每隔100毫秒下载一个
-        });
-    }
+        async function downloadAllQRCodes() {
+            const zip = new JSZip();
+            const qrCodes = document.querySelectorAll('.qr-image');
+            
+            qrCodes.forEach((qr, index) => {
+                const base64Data = qr.src.split(',')[1];
+                zip.file(`qr-code-${index + 1}.png`, base64Data, {base64: true});
+            });
+            
+            const content = await zip.generateAsync({type: 'blob'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = '<%= activity.name %>-二维码.zip';
+            link.click();
+        }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 </body>
 </html>

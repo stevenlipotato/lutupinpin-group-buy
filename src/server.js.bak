@@ -1,0 +1,425 @@
+require('dotenv').config();
+
+const express = require('express');
+const session = require('express-session');
+const bodyParser = require('body-parser');
+const QRCode = require('qrcode');
+const crypto = require('crypto');
+const path = require('path');
+const moment = require('moment');
+const fs = require('fs');
+
+const app = express();
+
+// 设置视图引擎
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+// 基础中间件
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+// 使用内存存储的 session
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'lutupinpin-secret',
+    resave: false,
+    saveUninitialized: true
+}));
+
+// 确保数据目录存在
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir);
+}
+
+// 测试数据
+const merchants = [
+    { id: 'merchant001', password: 'merchant888', name: '测试商家' }
+];
+
+// 从文件加载活动数据
+let activities = [];
+try {
+    const activitiesData = fs.readFileSync(path.join(dataDir, 'activities.json'), 'utf8');
+    activities = JSON.parse(activitiesData);
+} catch (error) {
+    console.log('No existing activities');
+}
+
+// 保存活动数据的函数
+function saveActivities() {
+    fs.writeFileSync(
+        path.join(dataDir, 'activities.json'),
+        JSON.stringify(activities, null, 2)
+    );
+}
+
+// 从文件加载核销记录
+let verificationRecords = [];
+try {
+    const data = fs.readFileSync(path.join(dataDir, 'verifications.json'), 'utf8');
+    verificationRecords = JSON.parse(data);
+} catch (error) {
+    console.log('No existing verification records');
+}
+
+// 保存核销记录的函数
+function saveVerificationRecords() {
+    fs.writeFileSync(
+        path.join(dataDir, 'verifications.json'),
+        JSON.stringify(verificationRecords, null, 2)
+    );
+}
+
+// 活动类型
+const activityTypes = {
+    NORMAL: 'normal',
+    BUY_ONE_GET_ONE: 'buy_one_get_one',
+    FREE: 'free',
+    DISCOUNT: 'discount'
+};
+
+const activityTypeNames = {
+    [activityTypes.NORMAL]: '普通活动',
+    [activityTypes.BUY_ONE_GET_ONE]: '买一送一',
+    [activityTypes.FREE]: '免费',
+    [activityTypes.DISCOUNT]: '折扣'
+};
+
+// 更新活动状态的函数
+function updateActivityStatus(activity) {
+    const now = new Date().getTime();
+    if (now < new Date(activity.startDate).getTime()) {
+        return '未开始';
+    } else if (now > new Date(activity.endDate).getTime()) {
+        return '已结束';
+    } else {
+        return '进行中';
+    }
+}
+
+// 认证中间件
+function requireMerchantAuth(req, res, next) {
+    if (req.session.merchantId) {
+        next();
+    } else {
+        res.redirect('/merchant/login');
+    }
+}
+
+function requireAdminAuth(req, res, next) {
+    if (req.session.isAdmin) {
+        next();
+    } else {
+        res.redirect('/admin');
+    }
+}
+
+// 路由
+app.get('/', (req, res) => {
+    res.redirect('/merchant/login');
+});
+
+// 商家登录
+app.get('/merchant/login', (req, res) => {
+    res.render('merchant-login', { error: null });
+});
+
+app.post('/merchant/login', (req, res) => {
+    const { id, password } = req.body;
+    const merchant = merchants.find(m => m.id === id && m.password === password);
+    
+    if (merchant) {
+        req.session.merchantId = merchant.id;
+        req.session.merchantName = merchant.name;
+        res.redirect('/merchant/verify');
+    } else {
+        res.render('merchant-login', { error: '账号或密码错误' });
+    }
+});
+
+// 商家核销页面
+app.get('/merchant/verify', requireMerchantAuth, (req, res) => {
+    const merchantId = req.session.merchantId;
+    const merchantRecords = verificationRecords.filter(r => r.merchantId === merchantId);
+    
+    const stats = {
+        today: merchantRecords.filter(r => {
+            const today = new Date();
+            const recordDate = new Date(r.verifiedAt);
+            return recordDate.toDateString() === today.toDateString();
+        }).length,
+        total: merchantRecords.length
+    };
+    
+    res.render('merchant-verify', {
+        merchantName: req.session.merchantName,
+        stats
+    });
+});
+
+// 商家核销记录
+app.get('/merchant/records', requireMerchantAuth, (req, res) => {
+    const merchantId = req.session.merchantId;
+    const records = verificationRecords
+        .filter(r => r.merchantId === merchantId)
+        .sort((a, b) => new Date(b.verifiedAt) - new Date(a.verifiedAt));
+    
+    res.render('merchant-records', {
+        records,
+        merchantName: req.session.merchantName,
+        moment
+    });
+});
+
+// 商家统计
+app.get('/merchant/stats', requireMerchantAuth, (req, res) => {
+    const merchantId = req.session.merchantId;
+    const merchantRecords = verificationRecords.filter(r => r.merchantId === merchantId);
+    
+    const stats = {
+        today: merchantRecords.filter(r => {
+            const today = new Date();
+            const recordDate = new Date(r.verifiedAt);
+            return recordDate.toDateString() === today.toDateString();
+        }).length,
+        total: merchantRecords.length,
+        byType: {},
+        byActivity: {}
+    };
+    
+    merchantRecords.forEach(record => {
+        const typeName = record.activityTypeName;
+        stats.byType[typeName] = (stats.byType[typeName] || 0) + 1;
+        
+        const activityName = record.activityName;
+        stats.byActivity[activityName] = (stats.byActivity[activityName] || 0) + 1;
+    });
+    
+    res.render('merchant-stats', {
+        stats,
+        merchantName: req.session.merchantName
+    });
+});
+
+// 获取商家统计数据
+app.get('/merchant/stats-data', requireMerchantAuth, (req, res) => {
+    const merchantId = req.session.merchantId;
+    const merchantRecords = verificationRecords.filter(r => r.merchantId === merchantId);
+    
+    const stats = {
+        today: merchantRecords.filter(r => {
+            const today = new Date();
+            const recordDate = new Date(r.verifiedAt);
+            return recordDate.toDateString() === today.toDateString();
+        }).length,
+        total: merchantRecords.length
+    };
+    
+    res.json(stats);
+});
+
+// 商家退出登录
+app.get('/merchant/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/merchant/login');
+});
+
+// 管理员登录
+app.get('/admin', (req, res) => {
+    res.render('admin-login', { error: null });
+});
+
+app.post('/admin/login', (req, res) => {
+    const { username, password } = req.body;
+    if (username === 'lutupinpin' && password === 'lutupinpin888') {
+        req.session.isAdmin = true;
+        res.redirect('/admin/dashboard');
+    } else {
+        res.render('admin-login', { error: '账号或密码错误' });
+    }
+});
+
+// 管理员仪表板
+app.get('/admin/dashboard', requireAdminAuth, (req, res) => {
+    // 更新所有活动状态
+    activities.forEach(activity => {
+        activity.status = updateActivityStatus(activity);
+    });
+    saveActivities();
+    
+    res.render('admin-dashboard', {
+        activities,
+        activityTypeNames
+    });
+});
+
+// 创建活动
+app.get('/admin/create-activity', requireAdminAuth, (req, res) => {
+    res.render('create-activity', {
+        activityTypes,
+        activityTypeNames,
+        defaultStart: moment().format('YYYY-MM-DD'),
+        defaultEnd: moment().add(7, 'days').format('YYYY-MM-DD')
+    });
+});
+
+app.post('/admin/create-activity', requireAdminAuth, (req, res) => {
+    const { name, type, rules, quota, startDate, endDate } = req.body;
+    
+    // 处理开始和结束时间
+    const start = moment(startDate).startOf('day');
+    const end = moment(endDate).endOf('day');
+    
+    const activity = {
+        id: crypto.randomBytes(16).toString('hex'),
+        name,
+        type,
+        rules,
+        quota: parseInt(quota),
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+        createdAt: new Date().toISOString(),
+        usedQuota: 0,
+        status: '进行中'
+    };
+    
+    activities.push(activity);
+    saveActivities();
+    res.redirect('/admin/dashboard');
+});
+
+// 活动统计
+app.get('/admin/activity/:id/stats', requireAdminAuth, (req, res) => {
+    const activity = activities.find(a => a.id === req.params.id);
+    if (!activity) {
+        return res.redirect('/admin/dashboard');
+    }
+    
+    const records = verificationRecords.filter(r => r.activityId === activity.id);
+    
+    res.render('activity-stats', {
+        activity,
+        records,
+        activityTypeNames,
+        moment
+    });
+});
+
+// 生成二维码
+app.get('/admin/activity/:id/qr-code', requireAdminAuth, async (req, res) => {
+    const activity = activities.find(a => a.id === req.params.id);
+    if (!activity) {
+        return res.redirect('/admin/dashboard');
+    }
+    
+    const codes = [];
+    const quota = activity.quota;
+    
+    for (let i = 0; i < quota; i++) {
+        const codeId = crypto.randomBytes(16).toString('hex');
+        const qrData = JSON.stringify({
+            activityId: activity.id,
+            codeId: codeId
+        });
+        
+        try {
+            const qrCode = await QRCode.toDataURL(qrData);
+            codes.push({
+                id: codeId,
+                qrCode: qrCode
+            });
+        } catch (err) {
+            console.error('生成二维码错误:', err);
+        }
+    }
+    
+    res.render('qr-code', {
+        activity,
+        codes,
+        verificationRecords: verificationRecords.filter(r => r.activityId === activity.id)
+    });
+});
+
+// 核销二维码
+app.post('/api/verify-qr', requireMerchantAuth, async (req, res) => {
+    const { qrData } = req.body;
+    
+    try {
+        const data = JSON.parse(qrData);
+        const { activityId, codeId } = data;
+        
+        // 检查活动是否存在
+        const activity = activities.find(a => a.id === activityId);
+        if (!activity) {
+            return res.json({ success: false, message: '活动不存在' });
+        }
+        
+        // 先检查是否已被使用，避免并发问题
+        const isUsed = verificationRecords.some(r => r.codeId === codeId);
+        if (isUsed) {
+            const record = verificationRecords.find(r => r.codeId === codeId);
+            return res.json({ 
+                success: false, 
+                message: `此二维码已于 ${new Date(record.verifiedAt).toLocaleString()} 被使用`,
+                usedInfo: {
+                    time: record.verifiedAt,
+                    merchant: record.merchantName
+                }
+            });
+        }
+        
+        // 检查活动状态
+        const now = new Date().getTime();
+        if (now < new Date(activity.startDate).getTime() || now > new Date(activity.endDate).getTime()) {
+            return res.json({ 
+                success: false, 
+                message: '活动已结束或未开始',
+                activity: {
+                    startDate: activity.startDate,
+                    endDate: activity.endDate
+                }
+            });
+        }
+        
+        // 创建新记录
+        const record = {
+            id: crypto.randomBytes(16).toString('hex'),
+            codeId,
+            activityId,
+            merchantId: req.session.merchantId,
+            merchantName: req.session.merchantName,
+            verifiedAt: new Date().toISOString(),
+            activityName: activity.name,
+            activityType: activity.type,
+            activityTypeName: activityTypeNames[activity.type]
+        };
+        
+        verificationRecords.push(record);
+        activity.usedQuota = (activity.usedQuota || 0) + 1;
+        
+        saveVerificationRecords();
+        saveActivities();
+        
+        res.json({ 
+            success: true, 
+            message: '核销成功',
+            activity: {
+                name: activity.name,
+                type: activityTypeNames[activity.type],
+                rules: activity.rules
+            }
+        });
+        
+    } catch (error) {
+        console.error('核销处理错误:', error);
+        res.json({ success: false, message: '无效的二维码' });
+    }
+});
+
+// 启动服务器
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

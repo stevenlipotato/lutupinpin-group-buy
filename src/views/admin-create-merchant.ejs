@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>鹿途拼拼 - 创建商家</title>
+    <link rel="stylesheet" href="/shared/admin-base.css">
+    <script src="/shared/utils.js"></script>
+</head>
+<body>
+    <%- include('shared/admin-header') %>
+
+    <main class="admin-container">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <span class="admin-card-title">创建商家账户</span>
+            </div>
+            
+            <form id="createMerchantForm" class="admin-form" onsubmit="return handleSubmit(event)">
+                <div class="form-group">
+                    <label>商家名称</label>
+                    <input type="text" name="merchantName" required class="admin-input" placeholder="请输入商家名称">
+                </div>
+
+                <div class="form-group">
+                    <label>登录用户名</label>
+                    <input type="text" name="username" required class="admin-input" placeholder="请输入登录用户名">
+                </div>
+
+                <div class="form-group">
+                    <label>登录密码</label>
+                    <input type="password" name="password" required class="admin-input" placeholder="请输入登录密码">
+                </div>
+
+                <div class="form-group">
+                    <label>确认密码</label>
+                    <input type="password" name="confirmPassword" required class="admin-input" placeholder="请再次输入密码">
+                </div>
+
+                <% if (activities && activities.length > 0) { %>
+                    <div class="form-group">
+                        <label>选择活动</label>
+                        <div class="activity-select">
+                            <% activities.forEach(activity => { %>
+                                <label class="activity-checkbox">
+                                    <input type="checkbox" name="activities[]" value="<%= activity.id %>">
+                                    <span class="activity-info">
+                                        <span class="activity-name"><%= activity.name %></span>
+                                        <span class="activity-type"><%= activityTypeNames[activity.type] %></span>
+                                    </span>
+                                </label>
+                            <% }); %>
+                        </div>
+                    </div>
+                <% } %>
+
+                <div class="form-actions">
+                    <button type="submit" class="admin-button">创建商家</button>
+                    <button type="button" onclick="history.back()" class="admin-button secondary">返回</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        function validateForm() {
+            const form = document.getElementById('createMerchantForm');
+            const password = form.password.value;
+            const confirmPassword = form.confirmPassword.value;
+            
+            if (password !== confirmPassword) {
+                showToast('两次输入的密码不一致', 'error');
+                return false;
+            }
+
+            if (password.length < 6) {
+                showToast('密码长度至少为6位', 'error');
+                return false;
+            }
+
+            const username = form.username.value;
+            if (username.length < 4) {
+                showToast('用户名长度至少为4位', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            
+            if (!validateForm()) {
+                return;
+            }
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            // 获取选中的活动ID数组
+            const selectedActivities = Array.from(form.querySelectorAll('input[name="activities[]"]:checked'))
+                .map(input => input.value);
+            
+            // 构建提交数据
+            const data = {
+                merchantName: formData.get('merchantName'),
+                username: formData.get('username'),
+                password: formData.get('password'),
+                activities: selectedActivities
+            };
+            
+            try {
+                const response = await fetch('/admin/merchants/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('商家创建成功', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/admin/merchants';
+                    }, 1000);
+                } else {
+                    showToast(result.message || '创建失败', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('创建失败，请重试', 'error');
+            }
+        }
+    </script>
+</body>
+</html> 

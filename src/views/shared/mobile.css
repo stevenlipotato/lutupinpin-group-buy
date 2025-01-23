@@ -1,0 +1,128 @@
+/* 移动端基础样式 */
+@media screen and (max-width: 768px) {
+    /* 导航栏适配 */
+    .nav-links {
+        padding: 10px 0;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .nav-link {
+        padding: 8px 12px;
+        margin: 0 5px;
+        font-size: 14px;
+    }
+
+    /* 内容区域适配 */
+    .container, 
+    .stats-container,
+    .scan-container {
+        padding: 15px;
+        margin: 10px;
+    }
+
+    /* 统计卡片适配 */
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 15px;
+    }
+
+    .stat-value {
+        font-size: 24px;
+    }
+
+    /* 表格适配 */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    /* 表单适配 */
+    .admin-form,
+    .merchant-form {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    /* 二维码扫描区域适配 */
+    #reader {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    /* 核销成功弹窗适配 */
+    .verify-success-animation {
+        width: 90%;
+        max-width: 350px;
+        padding: 20px;
+    }
+
+    .activity-info {
+        font-size: 14px;
+    }
+
+    /* 按钮适配 */
+    .admin-button,
+    .merchant-button {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    /* 图表适配 */
+    .chart-container {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    /* 活动卡片适配 */
+    .activity-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .activity-stats {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* 针对超小屏幕的优化 */
+@media screen and (max-width: 375px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nav-link {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+}
+
+/* 优化触摸交互 */
+@media (hover: none) {
+    .nav-link:active,
+    .admin-button:active,
+    .merchant-button:active {
+        transform: scale(0.98);
+    }
+
+    .stat-card:active {
+        transform: translateY(-2px);
+    }
+} 

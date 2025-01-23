@@ -1,21 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>商家登录 - 鹿途拼拼</title>
+    <title>商家登录</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f5f5f5;
         }
         .login-container {
             max-width: 400px;
-            margin: 50px auto;
+            margin: 20px auto;
             padding: 20px;
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
         }
         .form-group {
             margin-bottom: 15px;
@@ -23,7 +29,7 @@
         label {
             display: block;
             margin-bottom: 5px;
-            font-weight: bold;
+            color: #666;
         }
         input {
             width: 100%;
@@ -32,41 +38,84 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
-        .submit-btn {
+        button {
             width: 100%;
             padding: 10px;
-            background-color: #4CAF50;
+            background-color: #007bff;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
         }
-        .submit-btn:hover {
-            background-color: #45a049;
+        button:hover {
+            background-color: #0056b3;
         }
         .error {
-            color: red;
-            margin-bottom: 10px;
+            color: #dc3545;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .server-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .server-info h3 {
+            margin: 0 0 10px 0;
+            color: #666;
+            font-size: 16px;
+        }
+        .address-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .address-list li {
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+        .qr-hint {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 4px;
+            text-align: center;
+            color: #495057;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <h1>商家登录</h1>
+        <h2>商家登录</h2>
         <% if (error) { %>
             <div class="error"><%= error %></div>
         <% } %>
         <form action="/merchant/login" method="POST">
             <div class="form-group">
-                <label>商家ID:</label>
-                <input type="text" name="merchantId" required>
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username" required>
             </div>
             <div class="form-group">
-                <label>密码:</label>
-                <input type="password" name="password" required>
+                <label for="password">密码</label>
+                <input type="password" id="password" name="password" required>
             </div>
-            <button type="submit" class="submit-btn">登录</button>
+            <button type="submit">登录</button>
         </form>
+
+        <div class="server-info">
+            <h3>访问地址</h3>
+            <ul class="address-list">
+                <% serverAddresses.forEach(address => { %>
+                    <li>http://<%= address %>:<%= port %></li>
+                <% }); %>
+            </ul>
+            <div class="qr-hint">
+                请使用手机浏览器访问以上地址进行登录
+            </div>
+        </div>
     </div>
 </body>
 </html>

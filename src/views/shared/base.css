@@ -1,0 +1,542 @@
+/* 导入颜色变量 */
+@import './colors.css';
+
+/* 基础样式 */
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+/* 导航栏样式 */
+.nav-links {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    padding: 15px 0;
+    margin: 0;
+    text-align: center;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-link {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    margin: 0 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+/* 容器样式 */
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+/* 标题样式 */
+.page-title {
+    color: var(--accent-color);
+    font-size: 28px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--secondary-light);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-title::before {
+    content: '🦌';
+    font-size: 32px;
+    animation: bounce 2s infinite ease-in-out;
+}
+
+/* 卡片样式 */
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-color);
+    box-shadow: 0 8px 16px var(--hover-shadow);
+}
+
+.card::after {
+    content: '🦌';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    opacity: 0.1;
+    transform: rotate(15deg);
+}
+
+/* 按钮样式 */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-dark), var(--accent-color));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--hover-shadow);
+}
+
+/* 动画 */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        padding: 15px;
+        border-radius: 16px;
+    }
+
+    .nav-link {
+        padding: 8px 16px;
+        margin: 4px;
+        font-size: 14px;
+    }
+
+    .page-title {
+        font-size: 24px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}
+
+/* 添加品牌装饰元素 */
+.brand-decoration {
+    position: relative;
+}
+
+.brand-decoration::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2L8 6l4 4-4 4 8-4-4-4 4-4z" fill="%23FFB366" opacity="0.1"/></svg>') repeat;
+    opacity: 0.1;
+    z-index: 0;
+}
+
+/* 通用表格样式 */
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 20px 0;
+}
+
+.table th {
+    background-color: var(--secondary-color);
+    color: var(--accent-color);
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+}
+
+.table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table tr:hover {
+    background-color: var(--background-color);
+}
+
+/* 通用表单样式 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(255, 153, 51, 0.2);
+}
+
+/* 通用状态标签样式 */
+.status-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: white;
+}
+
+.status-success {
+    background: linear-gradient(135deg, var(--success-color), #45a049);
+}
+
+.status-warning {
+    background: linear-gradient(135deg, var(--warning-color), #FB8C00);
+}
+
+.status-error {
+    background: linear-gradient(135deg, var(--error-color), #E64A19);
+}
+
+/* 添加品牌标识栏样式 */
+.brand-header {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+    padding: 15px 0;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.brand-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.brand-logo {
+    font-size: 28px;
+    animation: bounce 2s infinite ease-in-out;
+}
+
+.brand-name {
+    font-size: 24px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.brand-subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.brand-decoration {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2L8 6l4 4-4 4 8-4-4-4 4-4z" fill="%23FFF" opacity="0.1"/></svg>');
+    background-size: 48px;
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+/* 添加加载动画 */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--background-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 9999;
+    transition: opacity 0.3s ease;
+}
+
+.loading-logo {
+    font-size: 48px;
+    margin-bottom: 20px;
+    animation: loadingBounce 1s infinite ease-in-out;
+}
+
+.loading-text {
+    color: var(--accent-color);
+    font-size: 18px;
+    font-weight: 500;
+}
+
+@keyframes loadingBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+/* 添加确认弹窗样式 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    max-width: 400px;
+    width: 90%;
+    position: relative;
+    animation: modalSlideIn 0.3s ease;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.modal-title {
+    color: var(--accent-color);
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.modal-logo {
+    font-size: 24px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+@keyframes modalSlideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* 页面切换动画 */
+.page-transition {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: pageEnter 0.5s ease forwards;
+}
+
+@keyframes pageEnter {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 为主要内容添加动画 */
+.dashboard-container,
+.records-container,
+.scan-container,
+.profile-container,
+.activities-container {
+    animation: pageEnter 0.5s ease;
+}
+
+/* 核销成功动画 */
+.verify-success-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    text-align: center;
+    opacity: 0;
+    z-index: 1000;
+    animation: successPop 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    min-width: 300px;
+    max-width: 400px;
+}
+
+.verify-success-deer {
+    font-size: 48px;
+    margin-bottom: 20px;
+    display: inline-block;
+    animation: deerJump 1s infinite;
+}
+
+.verify-success-title {
+    color: var(--accent-color);
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.verify-success-message {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.verify-success-message .activity-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.verify-success-message .time-greeting {
+    font-size: 16px;
+    color: var(--accent-color);
+}
+
+.verify-success-message .type-message {
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+.verify-success-message .brand-message {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-top: 5px;
+}
+
+.verify-success-decoration {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2L8 6l4 4-4 4 8-4-4-4 4-4z" fill="%23FFB366" opacity="0.1"/></svg>') repeat;
+    opacity: 0.1;
+    animation: bgFloat 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes successPop {
+    0% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 1;
+    }
+    40% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    80% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0;
+    }
+}
+
+@keyframes deerJump {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+@keyframes bgFloat {
+    from { background-position: 0 0; }
+    to { background-position: 100% 100%; }
+}
+
+/* 彩带动画 */
+.confetti {
+    position: fixed;
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform;
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    25% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+} 

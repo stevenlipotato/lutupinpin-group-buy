@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>鹿途拼拼 - 申请审核</title>
+    <link rel="stylesheet" href="/shared/admin-base.css">
+    <script src="/shared/utils.js"></script>
+</head>
+<body>
+    <!-- 管理后台头部 -->
+    <header class="admin-header">
+        <div class="admin-brand-container">
+            <span class="admin-brand-logo">🦌</span>
+            <div class="admin-brand-text">
+                <div class="admin-brand-name">鹿途拼拼</div>
+                <div class="admin-brand-subtitle">管理后台</div>
+            </div>
+        </div>
+        
+        <nav class="admin-nav">
+            <div class="admin-nav-links">
+                <a href="/admin/dashboard" class="admin-nav-link">主页</a>
+                <a href="/admin/create-activity" class="admin-nav-link">创建活动</a>
+                <a href="/admin/merchants" class="admin-nav-link">商家管理</a>
+                <a href="/admin/applications" class="admin-nav-link">申请审核</a>
+                <a href="/admin/logout" class="admin-nav-link">退出登录</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="admin-container">
+        <!-- 申请列表 -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <span class="admin-card-title">待审核申请</span>
+            </div>
+            
+            <% if (applications.length === 0) { %>
+                <div class="empty-state">
+                    <span class="empty-icon">📝</span>
+                    <p>暂无待审核的申请</p>
+                </div>
+            <% } else { %>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>申请时间</th>
+                            <th>商家</th>
+                            <th>活动</th>
+                            <th>活动类型</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% applications.forEach(app => { %>
+                            <tr>
+                                <td><%= moment(app.appliedAt).format('YYYY-MM-DD HH:mm:ss') %></td>
+                                <td><%= app.merchant.merchantName %></td>
+                                <td><%= app.activity.name %></td>
+                                <td><%= activityTypeNames[app.activity.type] %></td>
+                                <td>
+                                    <button onclick="approveApplication('<%= app.id %>')" class="admin-button">通过</button>
+                                    <button onclick="rejectApplication('<%= app.id %>')" class="admin-button danger">拒绝</button>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            <% } %>
+        </div>
+    </main>
+
+    <script>
+        async function approveApplication(appId) {
+            if (!await showConfirm('通过申请', '确定要通过该申请吗？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/admin/applications/${appId}/review`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        approved: true
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showToast('申请已通过', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(result.message || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('操作失败，请重试', 'error');
+            }
+        }
+
+        async function rejectApplication(appId) {
+            const note = prompt('请输入拒绝原因：');
+            if (note === null) return;
+            
+            try {
+                const response = await fetch(`/admin/applications/${appId}/review`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        approved: false,
+                        note
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showToast('申请已拒绝', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(result.message || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('操作失败，请重试', 'error');
+            }
+        }
+    </script>
+</body>
+</html> 

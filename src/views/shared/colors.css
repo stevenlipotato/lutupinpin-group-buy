@@ -1,0 +1,39 @@
+:root {
+    /* 主色调 */
+    --primary-color: #FF9933;     /* 明亮的橙色 */
+    --primary-light: #FFB366;     /* 浅橙色 */
+    --primary-dark: #E67300;      /* 深橙色 */
+    
+    /* 辅助色 */
+    --secondary-color: #FFB84D;   /* 温暖的黄橙色 */
+    --secondary-light: #FFD699;   /* 浅黄橙色 */
+    --secondary-dark: #CC8500;    /* 深黄橙色 */
+    
+    /* 强调色 */
+    --accent-color: #8B5E3C;      /* 鹿角棕色 */
+    --accent-light: #A67C5B;      /* 浅棕色 */
+    --accent-dark: #5C3C22;       /* 深棕色 */
+    
+    /* 背景色 */
+    --background-color: #FFF9F0;  /* 温暖的米色背景 */
+    --background-light: #FFFAF5;  /* 更浅的背景色 */
+    --background-dark: #F5E6D3;   /* 深一点的背景色 */
+    
+    /* 文字颜色 */
+    --text-color: #4A3728;        /* 暖棕色文字 */
+    --text-light: #7A6356;        /* 浅棕色文字 */
+    --text-dark: #2B1810;         /* 深棕色文字 */
+    
+    /* 状态颜色 */
+    --success-color: #4CAF50;     /* 绿色 */
+    --success-light: #81C784;
+    --warning-color: #FFA726;     /* 橙色 */
+    --warning-light: #FFB74D;
+    --error-color: #FF7043;       /* 红色 */
+    --error-light: #FF8A65;
+    
+    /* 边框和阴影 */
+    --border-color: #FFE0B2;      /* 浅橙色边框 */
+    --shadow-color: rgba(139, 94, 60, 0.1);
+    --hover-shadow: rgba(139, 94, 60, 0.2);
+} 

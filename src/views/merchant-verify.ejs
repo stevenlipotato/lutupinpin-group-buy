@@ -1,323 +1,650 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>扫码核销 - 鹿途拼拼</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <title>鹿途拼拼 - 扫码核销</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 添加 PWA 相关 meta 标签 -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" href="/shared/base.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .nav-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        .nav-btn {
-            padding: 8px 15px;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        .stats-btn {
-            background-color: #2196F3;
-        }
-        .records-btn {
-            background-color: #FF9800;
-        }
-        .logout-btn {
-            background-color: #f44336;
-        }
-        .merchant-info {
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-        }
         .scan-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px var(--shadow-color);
             position: relative;
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
         }
-        #video {
-            width: 100%;
-            border-radius: 8px;
-        }
-        #canvas {
-            display: none;
-        }
-        .scan-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 2px solid #2196F3;
-            border-radius: 8px;
-            pointer-events: none;
-        }
-        .scan-line {
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            background: #2196F3;
-            animation: scan 2s linear infinite;
-        }
-        @keyframes scan {
-            0% { top: 0; }
-            100% { top: 100%; }
-        }
-        .camera-controls {
-            margin-top: 20px;
+
+        .scan-title {
+            color: var(--accent-color);
             text-align: center;
-        }
-        .camera-btn {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .result-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            font-size: 28px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            gap: 12px;
         }
-        .modal-content {
-            background: white;
+
+        #reader {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            border: 2px solid var(--secondary-light);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+
+        #result {
+            margin: 20px auto;
             padding: 20px;
-            border-radius: 8px;
-            max-width: 80%;
-            width: 400px;
+            border-radius: 12px;
+            background: var(--background-light);
+            max-width: 600px;
+            transition: all 0.3s ease;
         }
-        .result-success {
-            color: #4CAF50;
+
+        .success {
+            color: var(--success-color);
+            border-left: 4px solid var(--success-color);
+            padding-left: 15px;
+            background: rgba(76, 175, 80, 0.1);
         }
-        .result-error {
-            color: #f44336;
+
+        .error {
+            color: var(--error-color);
+            border-left: 4px solid var(--error-color);
+            padding-left: 15px;
+            background: rgba(255, 112, 67, 0.1);
         }
-        .scan-status {
+
+        .scan-decoration {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .scan-decoration-tl {
+            top: 20px;
+            left: 20px;
+            border-top: 4px solid var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+            border-top-left-radius: 16px;
+        }
+
+        .scan-decoration-tr {
+            top: 20px;
+            right: 20px;
+            border-top: 4px solid var(--primary-color);
+            border-right: 4px solid var(--primary-color);
+            border-top-right-radius: 16px;
+        }
+
+        .scan-decoration-bl {
+            bottom: 20px;
+            left: 20px;
+            border-bottom: 4px solid var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+            border-bottom-left-radius: 16px;
+        }
+
+        .scan-decoration-br {
+            bottom: 20px;
+            right: 20px;
+            border-bottom: 4px solid var(--primary-color);
+            border-right: 4px solid var(--primary-color);
+            border-bottom-right-radius: 16px;
+        }
+
+        /* 添加核销结果显示区域样式 */
+        .verify-result-container {
+            margin-top: 30px;
             text-align: center;
-            margin: 10px 0;
-            font-size: 14px;
-            color: #666;
         }
-        .scan-tips {
-            margin-top: 10px;
+
+        #result {
+            font-size: 18px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin: 20px auto;
+            max-width: 400px;
+            transition: all 0.3s ease;
+        }
+
+        #result.success {
+            background: rgba(var(--success-rgb), 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        #result.error {
+            background: rgba(var(--error-rgb), 0.1);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        /* 核销成功动画样式 */
+        .verify-success-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            z-index: 1000;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .success-icon {
+            font-size: 48px;
+            color: var(--success-color);
+            margin-bottom: 20px;
+        }
+
+        .success-text h3 {
+            font-size: 24px;
+            color: var(--success-color);
+            margin-bottom: 15px;
+        }
+
+        .activity-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--background-light);
+            border-radius: 12px;
+        }
+
+        .activity-info p {
+            margin: 8px 0;
+            color: var(--text-color);
+        }
+
+        .activity-info .label {
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .activity-info .value {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* 添加关闭按钮样式 */
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--background-light);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .close-button:hover {
+            background: var(--background-dark);
+            color: var(--text-color);
+        }
+
+        .quota-exceeded-icon {
+            font-size: 48px;
+            color: var(--warning-color);
+            margin-bottom: 20px;
+        }
+
+        h3.quota-exceeded {
+            color: var(--warning-color);
+        }
+
+        .quota-message {
+            margin-top: 15px;
             padding: 10px;
-            background: #e3f2fd;
-            border-radius: 4px;
-            font-size: 14px;
-            color: #1976d2;
+            background: rgba(var(--warning-rgb), 0.1);
+            border-radius: 8px;
+            color: var(--warning-color);
+            font-weight: 500;
         }
-        .scan-success {
-            animation: flash 0.5s;
-        }
-        @keyframes flash {
-            0% { background: rgba(76, 175, 80, 0.5); }
-            100% { background: transparent; }
+
+        /* 移动端扫码界面优化 */
+        @media screen and (max-width: 768px) {
+            .scan-container {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .scan-title {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+
+            #reader {
+                border-radius: 12px;
+                overflow: hidden;
+            }
+
+            /* 隐藏HTML5 QR扫描器的一些不必要元素 */
+            #reader__dashboard_section_csr button {
+                font-size: 14px !important;
+                padding: 8px 12px !important;
+            }
+
+            #reader__filescan_input {
+                width: 100% !important;
+                margin: 10px 0 !important;
+            }
+
+            /* 优化结果显示 */
+            #result {
+                font-size: 16px;
+                padding: 12px 20px;
+            }
+
+            /* 优化成功动画 */
+            .verify-success-animation {
+                width: 90%;
+                padding: 20px;
+            }
+
+            .success-icon {
+                font-size: 36px;
+            }
+
+            .activity-info {
+                margin-top: 15px;
+                padding: 12px;
+            }
+
+            .activity-info p {
+                margin: 6px 0;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>扫码核销</h1>
-            <div class="nav-buttons">
-                <a href="/merchant/stats" class="nav-btn stats-btn">查看统计</a>
-                <a href="/merchant/records" class="nav-btn records-btn">查看记录</a>
-                <a href="/merchant/logout" class="nav-btn logout-btn">退出登录</a>
-            </div>
-        </div>
-
-        <div class="merchant-info">
-            <p>当前商家：<%= merchantName %></p>
-        </div>
-
-        <div class="scan-container">
-            <video id="video" playsinline></video>
-            <canvas id="canvas"></canvas>
-            <div class="scan-overlay">
-                <div class="scan-line"></div>
-            </div>
-        </div>
-
-        <div class="scan-status" id="scanStatus">准备就绪，等待扫码...</div>
-        <div class="scan-tips">
-            提示：
-            <ul>
-                <li>请将二维码对准扫描框</li>
-                <li>确保光线充足</li>
-                <li>保持手机稳定</li>
-            </ul>
-        </div>
-
-        <div class="camera-controls">
-            <button id="startButton" class="camera-btn">开启摄像头</button>
-        </div>
+    <div class="nav-links">
+        <a href="/merchant/dashboard" class="nav-link">主页</a>
+        <a href="/merchant/verify" class="nav-link">扫码核销</a>
+        <a href="/merchant/records" class="nav-link">核销记录</a>
+        <a href="/merchant/profile" class="nav-link">个人信息</a>
+        <a href="/merchant/logout" class="nav-link">退出登录</a>
     </div>
 
-    <div class="result-modal" id="resultModal">
-        <div class="modal-content">
-            <h2 id="resultTitle"></h2>
-            <p id="resultMessage"></p>
-            <div class="button-group">
-                <button onclick="closeModal()" class="camera-btn">继续扫码</button>
-            </div>
+    <div class="scan-container">
+        <div class="scan-decoration scan-decoration-tl"></div>
+        <div class="scan-decoration scan-decoration-tr"></div>
+        <div class="scan-decoration scan-decoration-bl"></div>
+        <div class="scan-decoration scan-decoration-br"></div>
+        
+        <h1 class="scan-title">
+            <span class="deer-icon">🦌</span>
+            扫码核销
+        </h1>
+        <div id="reader"></div>
+        <div class="verify-result-container">
+            <div id="result"></div>
         </div>
     </div>
 
     <script>
-        let video = document.getElementById('video');
-        let canvas = document.getElementById('canvas');
-        let ctx = canvas.getContext('2d');
-        let scanning = false;
-        let stream = null;
+        let isProcessing = false; // 添加标志防止重复提交
+        let lastScannedCode = null; // 记录上次成功扫描的二维码
+        let lastScanTime = 0; // 记录上次成功扫描的时间
 
-        document.getElementById('startButton').addEventListener('click', startCamera);
-
-        async function startCamera() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "environment" }
-                });
-                video.srcObject = stream;
-                video.setAttribute('playsinline', true);
-                video.play();
-                requestAnimationFrame(tick);
-                scanning = true;
-                
-                const button = document.getElementById('startButton');
-                button.textContent = '关闭摄像头';
-                button.onclick = stopCamera;
-                
-                document.getElementById('scanStatus').textContent = '准备就绪，等待扫码...';
-            } catch (err) {
-                console.error('Error:', err);
-                alert('无法访问摄像头，请确保已授予摄像头权限。');
-            }
-        }
-
-        function stopCamera() {
-            if (stream) {
-                stream.getTracks().forEach(track => {
-                    track.stop();
-                });
-                video.srcObject = null;
-                scanning = false;
-                stream = null;
-                
-                const button = document.getElementById('startButton');
-                button.textContent = '开启摄像头';
-                button.onclick = startCamera;
-                
-                document.getElementById('scanStatus').textContent = '摄像头已关闭';
-                
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            }
-        }
-
-        function tick() {
-            if (video.readyState === video.HAVE_ENOUGH_DATA && scanning) {
-                canvas.height = video.videoHeight;
-                canvas.width = video.videoWidth;
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                var code = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: "dontInvert",
-                });
-                
-                if (code) {
-                    handleQRCode(code.data);
-                    scanning = false;
+        // 修改扫码器配置，简化并优化配置
+        const html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", 
+            { 
+                fps: 10,
+                qrbox: {
+                    width: Math.min(250, window.innerWidth - 50),
+                    height: Math.min(250, window.innerWidth - 50)
+                },
+                aspectRatio: 1.0,
+                formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
+                // 使用默认摄像头设置
+                videoConstraints: {
+                    facingMode: { ideal: "environment" }
                 }
             }
-            if (scanning) {
-                requestAnimationFrame(tick);
+        );
+
+        // 修改初始化函数
+        async function initializeCamera() {
+            try {
+                console.log('开始初始化摄像头...');
+                
+                // 检查浏览器支持
+                if (!navigator.mediaDevices) {
+                    navigator.mediaDevices = {};
+                }
+
+                // 直接初始化扫码器
+                await html5QrcodeScanner.render(
+                    (decodedText) => {
+                        console.log('扫描到二维码:', decodedText);
+                        onScanSuccess(decodedText);
+                    },
+                    (error) => {
+                        // 只记录真正的错误
+                        if (error?.message?.includes('NotFound')) {
+                            console.error('扫描错误:', error);
+                        }
+                    }
+                );
+
+                console.log('扫码器初始化完成');
+            } catch (error) {
+                console.error('摄像头初始化错误:', error);
+                showError(error);
             }
         }
 
-        function handleQRCode(qrData) {
-            fetch('/api/verify-qr', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ qrData })
-            })
-            .then(response => response.json())
-            .then(data => {
-                showResult(data.success, data.message, data.activity);
-            })
-            .catch(error => {
-                showResult(false, '网络错误，请重试');
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 确保页面完全加载后再初始化
+            if (document.readyState === 'complete') {
+                initializeCamera();
+            } else {
+                window.addEventListener('load', initializeCamera);
+            }
+        });
+
+        // 修改扫描成功的处理函数
+        async function onScanSuccess(decodedText) {
+            const now = Date.now();
+            
+            // 如果正在处理中，则忽略
+            if (isProcessing) {
+                return;
+            }
+
+            // 尝试解析二维码数据
+            let qrData;
+            try {
+                qrData = JSON.parse(decodedText);
+                
+                // 验证二维码数据完整性
+                if (!qrData || !qrData.activityId || !qrData.codeId) {
+                    return; // 静默忽略不完整的扫描结果
+                }
+            } catch (error) {
+                return; // 静默忽略解析错误
+            }
+
+            const currentCode = qrData.codeId;
+
+            // 如果是同一个二维码，并且间隔小于5秒，则忽略
+            if (currentCode === lastScannedCode && (now - lastScanTime) < 5000) {
+                return;
+            }
+
+            try {
+                isProcessing = true;
+                lastScannedCode = currentCode;
+                lastScanTime = now;
+
+                const response = await fetch('/api/verify-qr', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        qrData: decodedText
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('网络请求失败');
+                }
+
+                const result = await response.json();
+                
+                // 显示结果
+                showResult(result.message, result.success);
+                
+                // 如果核销成功，显示动画和更新统计
+                if (result.success && result.activity) {
+                    showVerifySuccess(result.activity);
+                    try {
+                        await updateStats(); // 等待统计更新完成
+                    } catch (error) {
+                        console.error('Failed to update stats:', error);
+                    }
+                }
+
+            } catch (error) {
+                console.error('Verification error:', error);
+                if (error.name === 'NotAllowedError') {
+                    showResult('请允许访问摄像头', false);
+                } else {
+                    showResult('核销失败，请重试', false);
+                }
+            } finally {
+                setTimeout(() => {
+                    isProcessing = false;
+                }, 2000);
+            }
+        }
+
+        function onScanError(error) {
+            console.warn(`扫码错误: ${error}`);
+        }
+
+        function showResult(message, success) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = success ? 'success' : 'error';
+            resultDiv.textContent = message;
+
+            // 3秒后清除结果显示
+            setTimeout(() => {
+                resultDiv.textContent = '';
+                resultDiv.className = '';
+            }, 3000);
+        }
+
+        function showVerifySuccess(activity) {
+            // 移除所有现有的动画
+            document.querySelectorAll('.verify-success-animation').forEach(el => {
+                el.remove();
+            });
+
+            const successAnimation = document.createElement('div');
+            successAnimation.className = 'verify-success-animation';
+            
+            // 如果是配额用完的情况
+            if (!activity.success && activity.endReason === 'QUOTA_EXCEEDED') {
+                successAnimation.innerHTML = `
+                    <button class="close-button" onclick="closeSuccessAnimation(this.parentElement)">×</button>
+                    <div class="quota-exceeded-icon">🔒</div>
+                    <div class="success-text">
+                        <h3 class="quota-exceeded">活动已结束</h3>
+                        <div class="activity-info">
+                            <p>
+                                <span class="label">活动名称：</span>
+                                <span class="value">${activity.name}</span>
+                            </p>
+                            <p>
+                                <span class="label">活动类型：</span>
+                                <span class="value">${getActivityTypeName(activity.type)}</span>
+                            </p>
+                            <p>
+                                <span class="label">配额情况：</span>
+                                <span class="value">${activity.usedQuota}/${activity.totalQuota}</span>
+                            </p>
+                            <p class="quota-message">
+                                此活动配额已用完，无法继续核销
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // 成功核销显示
+                successAnimation.innerHTML = `
+                    <button class="close-button" onclick="closeSuccessAnimation(this.parentElement)">×</button>
+                    <div class="success-icon">✓</div>
+                    <div class="success-text">
+                        <h3>核销成功</h3>
+                        <div class="activity-info">
+                            <p>
+                                <span class="label">活动名称：</span>
+                                <span class="value">${activity.name}</span>
+                            </p>
+                            <p>
+                                <span class="label">活动类型：</span>
+                                <span class="value">${getActivityTypeName(activity.type)}</span>
+                            </p>
+                            <p>
+                                <span class="label">配额使用：</span>
+                                <span class="value">${activity.usedQuota}/${activity.totalQuota}</span>
+                            </p>
+                            <p>
+                                <span class="label">剩余配额：</span>
+                                <span class="value">${activity.remainingQuota}</span>
+                            </p>
+                            <p>
+                                <span class="label">核销时间：</span>
+                                <span class="value">${formatDate(new Date())}</span>
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 修改关闭按钮的处理
+            const closeButton = successAnimation.querySelector('.close-button');
+            if (closeButton) {
+                closeButton.onclick = () => {
+                    successAnimation.style.opacity = '0';
+                    setTimeout(() => {
+                        successAnimation.remove();
+                    }, 300);
+                };
+            }
+
+            document.body.appendChild(successAnimation);
+
+            // 自动关闭
+            setTimeout(() => {
+                if (successAnimation && document.body.contains(successAnimation)) {
+                    successAnimation.style.opacity = '0';
+                    setTimeout(() => {
+                        if (document.body.contains(successAnimation)) {
+                            successAnimation.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+        // 简化关闭动画函数
+        function closeSuccessAnimation(element) {
+            if (element && document.body.contains(element)) {
+                element.style.opacity = '0';
+                setTimeout(() => {
+                    if (document.body.contains(element)) {
+                        element.remove();
+                    }
+                }, 300);
+            }
+        }
+
+        // 格式化日期
+        function formatDate(date) {
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
             });
         }
 
-        function showResult(success, message, activity) {
-            const modal = document.getElementById('resultModal');
-            const title = document.getElementById('resultTitle');
-            const messageEl = document.getElementById('resultMessage');
-
-            title.className = success ? 'result-success' : 'result-error';
-            title.textContent = success ? '核销成功' : '核销失败';
-            
-            let messageText = message;
-            if (success && activity) {
-                messageText = `
-                    ${message}
-                    
-                    活动详情：
-                    - 名称：${activity.name}
-                    - 类型：${activity.type || '未指定'}
-                    - 规则：${activity.rules}
-                `;
-            }
-            messageEl.innerHTML = messageText.replace(/\n/g, '<br>');
-            
-            if ('vibrate' in navigator) {
-                navigator.vibrate(success ? [100] : [100, 100, 100]);
-            }
-            
-            modal.style.display = 'flex';
+        // 获取活动类型名称
+        function getActivityTypeName(type) {
+            const typeNames = {
+                'normal': '普通活动',
+                'free': '免费活动',
+                'discount': '折扣活动',
+                'buy_one_get_one': '买一送一'
+            };
+            return typeNames[type] || type;
         }
 
-        function closeModal() {
-            document.getElementById('resultModal').style.display = 'none';
-            if (confirm('是否继续扫码？')) {
-                scanning = true;
-                requestAnimationFrame(tick);
+        // 更新统计数据
+        async function updateStats() {
+            const response = await fetch('/merchant/verify/stats');
+            const stats = await response.json();
+            document.getElementById('todayCount').textContent = stats.today;
+            document.getElementById('totalCount').textContent = stats.total;
+        }
+
+        // 添加页面可见性变化处理
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                // 页面重新可见时，重新初始化摄像头
+                html5QrcodeScanner.resume();
             } else {
-                stopCamera();
+                // 页面不可见时，暂停摄像头
+                html5QrcodeScanner.pause();
+            }
+        });
+
+        function showError(error) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'error';
+            
+            let errorMessage = '摄像头初始化失败';
+            let solution = '请刷新页面重试';
+
+            if (error.name === 'NotAllowedError') {
+                errorMessage = '请允许访问摄像头';
+                solution = '点击浏览器地址栏的摄像头图标，选择"允许"';
+            } else if (error.name === 'NotFoundError') {
+                errorMessage = '未找到摄像头设备';
+                solution = '请确保设备有可用的摄像头';
+            }
+
+            resultDiv.innerHTML = `
+                <div class="error-message">
+                    <p>${errorMessage}</p>
+                    <p class="solution">${solution}</p>
+                    <button onclick="retryCamera()" class="retry-button">重试</button>
+                </div>
+            `;
+        }
+
+        // 添加重试函数
+        async function retryCamera() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '正在重新初始化摄像头...';
+            resultDiv.className = '';
+            
+            try {
+                await html5QrcodeScanner.clear();
+                await initializeCamera();
+            } catch (error) {
+                console.error('重试失败:', error);
+                showError(error);
             }
         }
     </script>

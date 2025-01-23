@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>编辑商家</title>
+    <style>
+        .edit-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #495057;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .note {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="edit-container">
+        <h2>编辑商家信息</h2>
+        <% if (locals.error) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
+        <form action="/admin/merchants/<%= merchant.id %>/edit" method="POST">
+            <div class="form-group">
+                <label for="merchantName">商家名称</label>
+                <input type="text" id="merchantName" name="merchantName" 
+                    value="<%= merchant.merchantName %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="username">账号</label>
+                <input type="text" value="<%= merchant.username %>" readonly>
+                <div class="note">账号不可修改</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="newPassword">新密码</label>
+                <input type="password" id="newPassword" name="newPassword">
+                <div class="note">如不修改密码请留空</div>
+            </div>
+            
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">保存修改</button>
+                <a href="/admin/merchants" class="btn btn-secondary">返回</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "901899f92f01fc393411c58376025bda",
+    "codeId": "381cdc784b8f986ba370284f2179c879",
+    "activityId": "d0630fb2d6e856f185a94233a8c6f1b9",
+    "merchantId": "aa1709812892c71b8b5185bfd07f6eb6",
+    "merchantName": "ohho cafe",
+    "verifiedAt": "2025-01-18T02:41:40.675Z",
+    "activityName": "活动",
+    "activityType": "discount",
+    "activityTypeName": "折扣",
+    "deviceInfo": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+    "verificationIP": "::1"
+  },
+  {
+    "id": "57a48c25d17d73f6e23f5d581b3d1ebe",
+    "codeId": "60fa827e334254fc6fe306f90a60efa3",
+    "activityId": "0c0a3f16bf8f61066f2b9206f3bb7e9a",
+    "merchantId": "24cc0d5a908ac66c032c8467cd395dc3",
+    "merchantName": "gakki",
+    "verifiedAt": "2025-01-20T21:59:42.422Z",
+    "activityName": "买一送一",
+    "activityType": "buy_one_get_one",
+    "activityTypeName": "买一送一",
+    "deviceInfo": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+    "verificationIP": "::1"
+  }
+]

@@ -1,0 +1,64 @@
+[
+  {
+    "id": "cde5d7cb59939b31ae742985e3606d90",
+    "name": "gs tea",
+    "type": "buy_one_get_one",
+    "rules": "maiyisongyi",
+    "quota": 3,
+    "startDate": "2025-01-18T00:00:00.000Z",
+    "endDate": "2025-01-25T23:59:59.999Z",
+    "createdAt": "2025-01-18T02:32:35.417Z",
+    "usedQuota": 0,
+    "status": "已停止",
+    "merchants": [
+      "4b10316365e93e0053264931880e980e"
+    ],
+    "createdBy": "d87a3a52bad0f7cd504d763f163ae6d9",
+    "approvedBy": null,
+    "approvedAt": null,
+    "forceStopped": true,
+    "stoppedAt": "2025-01-18T02:50:26.547Z",
+    "stoppedBy": "d87a3a52bad0f7cd504d763f163ae6d9",
+    "stopReason": "管理员手动停止"
+  },
+  {
+    "id": "d0630fb2d6e856f185a94233a8c6f1b9",
+    "name": "活动",
+    "type": "discount",
+    "rules": "来",
+    "quota": 5,
+    "startDate": "2025-01-18T00:00:00.000Z",
+    "endDate": "2025-01-25T23:59:59.999Z",
+    "createdAt": "2025-01-18T02:41:22.348Z",
+    "usedQuota": 1,
+    "status": "已停止",
+    "merchants": [
+      "aa1709812892c71b8b5185bfd07f6eb6"
+    ],
+    "createdBy": "d87a3a52bad0f7cd504d763f163ae6d9",
+    "approvedBy": null,
+    "approvedAt": null,
+    "forceStopped": true,
+    "stoppedAt": "2025-01-20T21:52:33.619Z",
+    "stoppedBy": "73141bb6579221045c0f68322ce6a42e",
+    "stopReason": "管理员手动停止"
+  },
+  {
+    "id": "0c0a3f16bf8f61066f2b9206f3bb7e9a",
+    "name": "买一送一",
+    "type": "buy_one_get_one",
+    "rules": "买一送一",
+    "quota": 3,
+    "startDate": "2025-01-20T00:00:00.000Z",
+    "endDate": "2025-01-27T23:59:59.999Z",
+    "createdAt": "2025-01-20T21:59:25.414Z",
+    "usedQuota": 1,
+    "status": "进行中",
+    "merchants": [
+      "fed3ba0295d90c9d60370d30969e7b23"
+    ],
+    "createdBy": "73141bb6579221045c0f68322ce6a42e",
+    "approvedBy": null,
+    "approvedAt": null
+  }
+]

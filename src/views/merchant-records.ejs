@@ -1,138 +1,301 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>核销记录 - 鹿途拼拼</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鹿途拼拼 - 核销记录</title>
+    <link rel="stylesheet" href="/shared/base.css">
+    <script src="/shared/utils.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
         .records-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 30px;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            box-shadow: 0 4px 12px var(--shadow-color);
         }
-        .header {
+
+        .records-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
-        .nav-buttons {
-            display: flex;
-            gap: 10px;
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
-        .nav-btn {
-            padding: 8px 15px;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
+
+        .stats-card {
+            background: var(--background-light);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .stats-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .stats-label {
+            color: var(--text-light);
             font-size: 14px;
         }
-        .back-btn {
-            background-color: #666;
+
+        .date-group {
+            margin-bottom: 30px;
+            animation: fadeIn 0.5s ease-out;
         }
-        .stats-btn {
-            background-color: #2196F3;
-        }
-        .logout-btn {
-            background-color: #f44336;
-        }
-        .merchant-info {
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-        }
-        .records-list {
-            margin-top: 20px;
-        }
-        .record-item {
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            background: white;
-        }
-        .record-header {
+
+        .date-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
+            align-items: center;
         }
-        .record-time {
-            color: #666;
+
+        .date-stats {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .records-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            margin-bottom: 20px;
+        }
+
+        .records-table th {
+            background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
+            color: var(--accent-dark);
+            padding: 15px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .records-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .records-table tr:hover {
+            background-color: var(--background-light);
+        }
+
+        .filter-section {
+            background: var(--background-light);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .filter-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
             font-size: 14px;
         }
-        .record-details {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #eee;
+
+        .export-btn {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-light));
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
         }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .page-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .page-btn:hover {
+            background: var(--background-light);
+            transform: translateY(-2px);
+        }
+
+        .page-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
         .activity-type {
             display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            margin-left: 8px;
-            background-color: #e3f2fd;
-            color: #1976d2;
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
         }
-        .empty-state {
+
+        .type-normal { 
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        }
+        .type-buy_one_get_one { 
+            background: linear-gradient(135deg, var(--success-color), var(--success-light));
+        }
+        .type-free { 
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-light));
+        }
+        .type-discount { 
+            background: linear-gradient(135deg, var(--warning-color), var(--warning-light));
+        }
+
+        .record-time {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .device-info {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .empty-records {
             text-align: center;
             padding: 40px;
-            color: #666;
+            background: var(--background-light);
+            border-radius: 12px;
+            color: var(--text-light);
+            margin: 20px 0;
         }
     </style>
 </head>
 <body>
-    <div class="records-container">
-        <div class="header">
-            <h1>核销记录</h1>
-            <div class="nav-buttons">
-                <a href="/merchant/verify" class="nav-btn back-btn">返回扫码</a>
-                <a href="/merchant/stats" class="nav-btn stats-btn">查看统计</a>
-                <a href="/merchant/logout" class="nav-btn logout-btn">退出登录</a>
+    <%- include('shared/merchant-header') %>
+
+    <main class="container">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">核销记录</span>
+            </div>
+
+            <div class="filter-section">
+                <form id="filterForm" class="filter-form">
+                    <div class="form-group">
+                        <label>开始日期</label>
+                        <input type="date" name="startDate" value="<%= locals.query ? query.startDate : '' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>结束日期</label>
+                        <input type="date" name="endDate" value="<%= locals.query ? query.endDate : '' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>活动类型</label>
+                        <select name="activityType">
+                            <option value="">全部</option>
+                            <% Object.entries(activityTypeNames).forEach(([key, value]) => { %>
+                                <option value="<%= key %>" <%= (locals.query && query.activityType === key) ? 'selected' : '' %>>
+                                    <%= value %>
+                                </option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <button type="submit" class="button">筛选</button>
+                </form>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>核销时间</th>
+                        <th>活动名称</th>
+                        <th>活动类型</th>
+                        <th>二维码ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% records.forEach(record => { %>
+                        <tr>
+                            <td><%= moment(record.verifiedAt).format('YYYY-MM-DD HH:mm:ss') %></td>
+                            <td><%= record.activityName %></td>
+                            <td><%= activityTypeNames[record.activityType] %></td>
+                            <td><%= record.codeId %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <% if (currentPage > 1) { %>
+                    <a href="?page=<%= currentPage - 1 %>" class="button">上一页</a>
+                <% } %>
+                <span class="page-info">第 <%= currentPage %> 页</span>
+                <% if (records.length === (locals.pageSize || 20)) { %>
+                    <a href="?page=<%= currentPage + 1 %>" class="button">下一页</a>
+                <% } %>
             </div>
         </div>
+    </main>
 
-        <div class="merchant-info">
-            <p>当前商家：<%= merchantName %></p>
-        </div>
+    <script>
+        function exportRecords() {
+            window.location.href = '/merchant/export-records';
+        }
 
-        <div class="records-list">
-            <% if (records && records.length > 0) { %>
-                <% records.forEach(record => { %>
-                    <div class="record-item">
-                        <div class="record-header">
-                            <h3>
-                                <%= record.activityName %>
-                                <span class="activity-type"><%= record.activityTypeName %></span>
-                            </h3>
-                            <span class="record-time">
-                                <%= moment(record.verifiedAt).format('YYYY-MM-DD HH:mm:ss') %>
-                            </span>
-                        </div>
-                        <div class="record-details">
-                            <p>核销编号：<%= record.codeId %></p>
-                            <p>活动ID：<%= record.activityId %></p>
-                        </div>
-                    </div>
-                <% }) %>
-            <% } else { %>
-                <div class="empty-state">
-                    <h2>暂无核销记录</h2>
-                    <p>开始扫码核销后，记录将显示在这里</p>
-                </div>
-            <% } %>
-        </div>
-    </div>
+        function filterRecords(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const params = new URLSearchParams(formData);
+            window.location.href = `/merchant/records?${params.toString()}`;
+            return false;
+        }
+
+        function changePage(page) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', page);
+            window.location.href = url.toString();
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>鹿途拼拼 - 可申请活动</title>
+    <link rel="stylesheet" href="/shared/base.css">
+    <style>
+        .activities-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .activity-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .activity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px var(--hover-shadow);
+            border-color: var(--primary-color);
+        }
+
+        .activity-type {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 10px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        .activity-info {
+            background: var(--background-light);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .quota-info {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--secondary-light), var(--background-light));
+            border-radius: 12px;
+            color: var(--accent-color);
+            font-weight: 500;
+            margin: 20px 0;
+        }
+
+        .apply-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .apply-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--primary-dark), var(--accent-color));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .apply-btn:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-links">
+        <a href="/merchant/dashboard" class="nav-link">主页</a>
+        <a href="/merchant/verify" class="nav-link">扫码核销</a>
+        <a href="/merchant/activities/available" class="nav-link">申请活动</a>
+        <a href="/merchant/records" class="nav-link">核销记录</a>
+        <a href="/merchant/profile" class="nav-link">个人信息</a>
+        <a href="/merchant/logout" class="nav-link">退出登录</a>
+    </div>
+
+    <div class="activities-container">
+        <div class="page-header">
+            <h1 class="page-title">可申请的活动</h1>
+            <p class="page-description">这里展示了所有您可以参与的活动，申请后等待管理员审核即可开始活动。</p>
+        </div>
+        
+        <% if (activities && activities.length > 0) { %>
+            <div class="activity-grid">
+                <% activities.forEach(activity => { %>
+                    <div class="activity-card">
+                        <div class="activity-header">
+                            <div class="activity-name"><%= activity.name %></div>
+                            <span class="activity-type type-<%= activity.type %>">
+                                <%= activityTypeNames[activity.type] %>
+                            </span>
+                        </div>
+                        
+                        <div class="activity-info">
+                            <div class="info-item">
+                                <span class="info-label">开始时间</span>
+                                <span><%= new Date(activity.startDate).toLocaleDateString() %></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">结束时间</span>
+                                <span><%= new Date(activity.endDate).toLocaleDateString() %></span>
+                            </div>
+                        </div>
+
+                        <div class="quota-info">
+                            剩余名额：<strong><%= activity.quota - (activity.usedQuota || 0) %></strong>/<%= activity.quota %>
+                        </div>
+                        
+                        <div class="rules-section">
+                            <div class="rules-title">活动规则</div>
+                            <div class="rules-content"><%= activity.rules %></div>
+                        </div>
+                        
+                        <button 
+                            class="apply-btn" 
+                            onclick="applyActivity('<%= activity.id %>')"
+                            <%= (activity.quota - (activity.usedQuota || 0)) <= 0 ? 'disabled' : '' %>
+                        >
+                            <%= (activity.quota - (activity.usedQuota || 0)) <= 0 ? '名额已满' : '申请参与' %>
+                        </button>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="no-activities">
+                <h3>暂无可申请的活动</h3>
+                <p>目前没有新的活动可以申请，请稍后再来查看。</p>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        async function applyActivity(activityId) {
+            try {
+                const response = await fetch('/merchant/activities/apply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ activityId })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert('申请成功，请等待管理员审核');
+                    window.location.reload();
+                } else {
+                    alert(data.error || '申请失败，请重试');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('申请失败，请重试');
+            }
+        }
+    </script>
+</body>
+</html> 

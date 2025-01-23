@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>鹿途拼拼 - 个人信息</title>
+    <link rel="stylesheet" href="/shared/base.css">
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            margin: -30px -30px 30px;
+            padding: 40px 30px;
+            color: white;
+            position: relative;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .profile-section {
+            background: var(--background-light);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .profile-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .profile-label {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .profile-value {
+            color: var(--text-color);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            width: 100%;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .edit-btn:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--accent-color));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- 添加统一的导航菜单 -->
+    <div class="nav-links">
+        <a href="/merchant/dashboard" class="nav-link">主页</a>
+        <a href="/merchant/verify" class="nav-link">扫码核销</a>
+        <a href="/merchant/activities/available" class="nav-link">申请活动</a>
+        <a href="/merchant/records" class="nav-link">核销记录</a>
+        <a href="/merchant/profile" class="nav-link">个人信息</a>
+        <a href="/merchant/logout" class="nav-link">退出登录</a>
+    </div>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <h2>个人信息</h2>
+        </div>
+        
+        <div class="profile-section">
+            <div class="profile-label">商家名称</div>
+            <div class="profile-value"><%= merchant.merchantName %></div>
+        </div>
+        
+        <div class="profile-section">
+            <div class="profile-label">登录账号</div>
+            <div class="profile-value"><%= merchant.username %></div>
+        </div>
+        
+        <div class="profile-section">
+            <div class="profile-label">账号状态</div>
+            <div class="profile-value">
+                <%= merchant.status === 'active' ? '正常' : '已停用' %>
+            </div>
+        </div>
+        
+        <div class="profile-section">
+            <div class="profile-label">注册时间</div>
+            <div class="profile-value">
+                <%= new Date(merchant.createdAt).toLocaleString() %>
+            </div>
+        </div>
+        
+        <button class="edit-btn" onclick="location.href='/merchant/profile/edit'">
+            修改信息
+        </button>
+    </div>
+</body>
+</html> 
