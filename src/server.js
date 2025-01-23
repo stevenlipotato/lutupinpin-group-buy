@@ -113,35 +113,6 @@ requiredEnvVars.forEach(varName => {
     }
 });
 
-// 添加在路由之前的错误处理中间件
-app.use((err, req, res, next) => {
-    logger.error('Unhandled error:', {
-        error: err.message,
-        stack: err.stack,
-        url: req.url,
-        method: req.method,
-        ip: req.ip
-    });
-
-    res.status(500).render('error', {
-        message: process.env.NODE_ENV === 'production' 
-            ? '服务器错误，请稍后重试' 
-            : err.message
-    });
-});
-
-// 404 处理
-app.use((req, res) => {
-    logger.warn('404 Not Found:', {
-        url: req.url,
-        method: req.method,
-        ip: req.ip
-    });
-    res.status(404).render('error', {
-        message: '页面不存在'
-    });
-});
-
 // 在文件顶部确保环境变量
 if (!process.env.QR_SECRET) {
     process.env.QR_SECRET = 'lutupinpin-qr-secret'; // 默认值
@@ -1230,16 +1201,20 @@ async function reloadUsers() {
     }
 }
 
-// 添加错误处理中间件
-app.use((err, req, res, next) => {
-    console.error('Application error:', err);
-    res.status(500).send('服务器错误，请重试');
+// 错误处理中间件 - 放在所有路由之后
+app.use((req, res, next) => {
+    res.status(404).render('error', { 
+        message: '页面不存在'
+    });
 });
 
-// 添加请求日志中间件
-app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
-    next();
+app.use((err, req, res, next) => {
+    console.error('Server error:', err);
+    res.status(500).render('error', { 
+        message: process.env.NODE_ENV === 'production' 
+            ? '服务器错误，请稍后重试' 
+            : err.message 
+    });
 });
 
 // 停止活动路由

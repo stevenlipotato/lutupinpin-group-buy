@@ -4,12 +4,19 @@
     {
       "src": "src/server.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "src/views/shared/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/shared/(.*)",
-      "dest": "/src/views/shared/$1"
+      "dest": "/src/views/shared/$1",
+      "headers": {
+        "cache-control": "public, max-age=86400"
+      }
     },
     {
       "src": "/(.*)",
