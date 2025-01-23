@@ -1201,132 +1201,34 @@ async function reloadUsers() {
     }
 }
 
-// 错误处理中间件 - 放在所有路由之后
+// 在所有路由的最后添加这些中间件
 app.use((req, res, next) => {
-    res.status(404).render('error', { 
-        message: '页面不存在'
+    res.status(404).json({ 
+        error: '页面不存在' 
     });
 });
 
 app.use((err, req, res, next) => {
     console.error('Server error:', err);
-    res.status(500).render('error', { 
-        message: process.env.NODE_ENV === 'production' 
-            ? '服务器错误，请稍后重试' 
-            : err.message 
+    res.status(500).json({ 
+        error: '服务器错误，请稍后重试'
     });
 });
 
-// 停止活动路由
-app.post('/admin/activity/:id/stop', requireAdminAuth, async (req, res) => {
-    try {
-        const activity = await Activity.findOne({ id: req.params.id });
-        if (!activity) {
-            return res.status(404).json({
-                success: false,
-                message: '活动不存在'
-            });
-        }
-
-        activity.forceStopped = true;
-        activity.status = '已停止';
-        await activity.save();
-
-        // 返回更新后的活动信息
-        res.json({
-            success: true,
-            message: '活动已停止',
-            activity: {
-                id: activity.id,
-                name: activity.name,
-                status: activity.status,
-                forceStopped: activity.forceStopped
-            }
-        });
-    } catch (error) {
-        console.error('Stop activity error:', error);
-        res.status(500).json({
-            success: false,
-            message: '停止活动失败'
-        });
-    }
-});
-
-// 添加 IP 地址获取中间件
-app.use((req, res, next) => {
-    // 获取服务器 IP 地址
-    const networkInterfaces = require('os').networkInterfaces();
-    const addresses = [];
-    for (const k in networkInterfaces) {
-        for (const k2 in networkInterfaces[k]) {
-            const address = networkInterfaces[k][k2];
-            if (address.family === 'IPv4' && !address.internal) {
-                addresses.push(address.address);
-            }
-        }
-    }
-    res.locals.serverAddresses = addresses;
-    next();
-});
-
-// 生成自签名证书（仅用于开发）
-const options = {
-    key: fs.readFileSync(path.join(__dirname, 'dev-cert/key.pem')),
-    cert: fs.readFileSync(path.join(__dirname, 'dev-cert/cert.pem'))
-};
-
-// MongoDB 配置
-mongoose.set('strictQuery', true);
-
-// 添加 mongoose 调试
-mongoose.set('debug', process.env.NODE_ENV === 'development');
-
-// 连接数据库
+// 修改数据库连接
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000, // 超时时间
-    socketTimeoutMS: 45000, // Socket 超时
-    retryWrites: true
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000
 }).then(() => {
     console.log('MongoDB connected successfully');
-    
-    // 创建默认管理员账号
     createDefaultAdmin();
-    
-    // 在数据库连接成功后再启动服务器
-    const PORT = process.env.PORT || 3000;
-    const server = app.listen(PORT, '0.0.0.0', () => {
-        console.log(`HTTP Server running on http://0.0.0.0:${PORT}`);
-    });
 }).catch(err => {
     console.error('MongoDB connection error:', err);
-    // 不要立即退出进程
-    console.error('Failed to connect to MongoDB, retrying...');
 });
 
-// 添加更多连接事件监听
-mongoose.connection.on('connecting', () => {
-    console.log('Connecting to MongoDB...');
-});
-
-mongoose.connection.on('connected', () => {
-    console.log('MongoDB connected!');
-});
-
-mongoose.connection.on('disconnected', () => {
-    console.log('MongoDB disconnected, attempting to reconnect...');
-});
-
-mongoose.connection.on('error', err => {
-    console.error('MongoDB error:', err);
-});
-
-// 确保有环境变量
-if (!process.env.MONGODB_URI) {
-    console.error('Missing MONGODB_URI environment variable');
-    process.exit(1);
-}
+// 移除 server.listen，因为 Vercel 会自动处理这个
 
 // 替换原来的默认管理员创建代码
 async function createDefaultAdmin() {

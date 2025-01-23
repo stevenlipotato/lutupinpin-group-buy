@@ -4,23 +4,20 @@
     {
       "src": "src/server.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "src/views/shared/**",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/shared/(.*)",
-      "dest": "/src/views/shared/$1",
-      "headers": {
-        "cache-control": "public, max-age=86400"
-      }
+      "dest": "/src/views/shared/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "src/server.js"
+      "dest": "/src/server.js",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "*"
+      }
     }
   ],
   "env": {
