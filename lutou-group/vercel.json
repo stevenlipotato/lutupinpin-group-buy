@@ -5,14 +5,15 @@
       "src": "./src/app.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["src/**"]
+        "includeFiles": ["src/**"],
+        "maxLambdaSize": "50mb"
       }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "./src/app.js"
+      "dest": "/src/app.js"
     }
   ]
 } 
