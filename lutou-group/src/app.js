@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -8,6 +9,13 @@ const app = express();
 // 中间件
 app.use(cors());
 app.use(express.json());
+
+// 配置静态文件
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
+// 配置视图引擎
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');  // 如果您使用 EJS
 
 // 数据库连接
 mongoose.connect(process.env.MONGODB_URI, {
