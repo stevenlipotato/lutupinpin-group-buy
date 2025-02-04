@@ -30,10 +30,36 @@ app.get('/', (req, res) => {
   res.json({ message: 'API is working' });
 });
 
-// 错误处理中间件
+// 添加健康检查路由
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    environment: process.env.NODE_ENV,
+    timestamp: new Date().toISOString(),
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
+// 添加更详细的错误日志
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
+  console.error('Error details:', {
+    message: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    body: req.body,
+    query: req.query
+  });
+  res.status(500).json({ 
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV !== 'production' ? err.message : 'Internal Server Error'
+  });
+});
+
+// 添加未找到路由的处理
+app.use((req, res) => {
+  console.log('404 Not Found:', req.path);
+  res.status(404).json({ message: `Route ${req.path} not found` });
 });
 
 // Vercel 需要导出 app

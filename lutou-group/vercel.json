@@ -3,22 +3,13 @@
   "builds": [
     {
       "src": "./src/app.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "src/public/**",
-      "use": "@vercel/static"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["src/**"]
+      }
     }
   ],
   "routes": [
-    {
-      "src": "/public/(.*)",
-      "dest": "/src/public/$1"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "./src/app.js"
-    },
     {
       "src": "/(.*)",
       "dest": "./src/app.js"
